@@ -7,59 +7,34 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { suggestions } from '@/src/suggestions';
-import { MutableRefObject, useCallback, useRef, useState } from 'react';
+import { suggestions } from '@/src/data/suggestions';
+import { formatMinutes, formatSeconds } from '@/src/utils/formatTime';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
 export default function Home() {
   const [timerState, setTimerState] = useState<
     'notStarted' | 'running' | 'paused'
   >('notStarted');
-  const [minutes, setMinutes] = useState('00');
-  const [seconds, setSeconds] = useState('00');
+  const [timeRemaining, setTimeRemaining] = useState(0);
 
-  const interval: MutableRefObject<NodeJS.Timeout | null> = useRef(null);
+  const timeout: MutableRefObject<NodeJS.Timeout | null> = useRef(null);
 
-  const updateMinutes = useCallback(() => {
-    if (minutes === '00') return;
-
-    setMinutes((currentMinute) => {
-      const numberSecond = Number(currentMinute);
-      const newSecond = numberSecond - 1;
-      return `0${newSecond}`.slice(-2);
-    });
-  }, [minutes]);
-
-  const updateSeconds = useCallback(() => {
-    if (seconds === '00') {
-      if (minutes !== '00') setSeconds('59');
-      updateMinutes();
-      return;
-    }
-
-    setSeconds((currentSecond) => {
-      const numberSecond = Number(currentSecond);
-      const newSecond = numberSecond - 1;
-      return `0${newSecond}`.slice(-2);
-    });
-  }, [minutes, seconds, updateMinutes, setSeconds]);
-
-  const startTimer = useCallback(() => {
-    setTimerState('running');
-
-    if (interval.current) clearInterval(interval.current);
-
-    interval.current = setInterval(() => {
-      updateSeconds();
-      console.log('🔴🔴🔴 interval');
-      console.log(`minutes:`, minutes);
-      console.log(`seconds:`, seconds);
-
-      if (minutes === '00' && seconds === '01' && interval.current) {
-        clearInterval(interval.current);
+  useEffect(() => {
+    if (timerState === 'running') {
+      if (timeRemaining > 0) {
+        if (timeout.current) clearInterval(timeout.current);
+        timeout.current = setTimeout(() => {
+          setTimeRemaining((timeRemaining) => timeRemaining - 1);
+        }, 1000);
+      } else {
         setTimerState('notStarted');
       }
-    }, 1000);
-  }, [minutes, seconds, updateSeconds]);
+    }
+
+    return () => {
+      if (timeout.current) clearTimeout(timeout.current);
+    };
+  }, [timeRemaining, timerState]);
 
   return (
     <main className="grid place-items-center min-h-screen">
@@ -70,21 +45,18 @@ export default function Home() {
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-3">
           <h2 className="text-4xl text-center font-mono">
-            {minutes}:{seconds}
+            {formatMinutes(timeRemaining)}:{formatSeconds(timeRemaining)}
           </h2>
           <div className="flex gap-2">
             <Button
-              disabled={minutes === '00' && seconds === '00'}
-              onClick={() => {
-                startTimer();
-                setTimerState(
-                  timerState === 'notStarted'
+              disabled={timeRemaining === 0}
+              onClick={() =>
+                setTimerState((currentState) =>
+                  currentState === 'notStarted' || currentState === 'paused'
                     ? 'running'
-                    : timerState === 'running'
-                    ? 'paused'
-                    : 'notStarted'
-                );
-              }}
+                    : 'paused'
+                )
+              }
             >
               {timerState === 'notStarted'
                 ? 'Start'
@@ -95,10 +67,9 @@ export default function Home() {
             <Button
               disabled={timerState === 'notStarted'}
               onClick={() => {
-                setMinutes('00');
-                setSeconds('00');
+                setTimeRemaining(0);
                 setTimerState('notStarted');
-                if (interval.current) clearInterval(interval.current);
+                if (timeout.current) clearInterval(timeout.current);
               }}
             >
               Reset
@@ -112,8 +83,8 @@ export default function Home() {
               key={suggestion.label}
               disabled={timerState === 'running'}
               onClick={() => {
-                setMinutes(suggestion.time.minutes);
-                setSeconds(suggestion.time.seconds);
+                setTimeRemaining(suggestion.time);
+                setTimerState('notStarted');
               }}
             >
               {suggestion.label}
