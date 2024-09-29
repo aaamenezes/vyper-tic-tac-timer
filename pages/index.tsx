@@ -1,115 +1,126 @@
-import Image from "next/image";
-import localFont from "next/font/local";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { suggestions } from '@/src/suggestions';
+import { MutableRefObject, useCallback, useRef, useState } from 'react';
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [timerState, setTimerState] = useState<
+    'notStarted' | 'running' | 'paused'
+  >('notStarted');
+  const [minutes, setMinutes] = useState('00');
+  const [seconds, setSeconds] = useState('00');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const interval: MutableRefObject<NodeJS.Timeout | null> = useRef(null);
+
+  const updateMinutes = useCallback(() => {
+    if (minutes === '00') return;
+
+    setMinutes((currentMinute) => {
+      const numberSecond = Number(currentMinute);
+      const newSecond = numberSecond - 1;
+      return `0${newSecond}`.slice(-2);
+    });
+  }, [minutes]);
+
+  const updateSeconds = useCallback(() => {
+    if (seconds === '00') {
+      if (minutes !== '00') setSeconds('59');
+      updateMinutes();
+      return;
+    }
+
+    setSeconds((currentSecond) => {
+      const numberSecond = Number(currentSecond);
+      const newSecond = numberSecond - 1;
+      return `0${newSecond}`.slice(-2);
+    });
+  }, [minutes, seconds, updateMinutes, setSeconds]);
+
+  const startTimer = useCallback(() => {
+    setTimerState('running');
+
+    if (interval.current) clearInterval(interval.current);
+
+    interval.current = setInterval(() => {
+      updateSeconds();
+      console.log('🔴🔴🔴 interval');
+      console.log(`minutes:`, minutes);
+      console.log(`seconds:`, seconds);
+
+      if (minutes === '00' && seconds === '01' && interval.current) {
+        clearInterval(interval.current);
+        setTimerState('notStarted');
+      }
+    }, 1000);
+  }, [minutes, seconds, updateSeconds]);
+
+  return (
+    <main className="grid place-items-center min-h-screen">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Viper Tic Tac Timer</CardTitle>
+          <CardDescription>Seu timer bonitinho!</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-3">
+          <h2 className="text-4xl text-center font-mono">
+            {minutes}:{seconds}
+          </h2>
+          <div className="flex gap-2">
+            <Button
+              disabled={minutes === '00' && seconds === '00'}
+              onClick={() => {
+                startTimer();
+                setTimerState(
+                  timerState === 'notStarted'
+                    ? 'running'
+                    : timerState === 'running'
+                    ? 'paused'
+                    : 'notStarted'
+                );
+              }}
+            >
+              {timerState === 'notStarted'
+                ? 'Start'
+                : timerState === 'running'
+                ? 'Pause'
+                : 'Continue'}
+            </Button>
+            <Button
+              disabled={timerState === 'notStarted'}
+              onClick={() => {
+                setMinutes('00');
+                setSeconds('00');
+                setTimerState('notStarted');
+                if (interval.current) clearInterval(interval.current);
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-wrap gap-2">
+          {suggestions.map((suggestion) => (
+            <Button
+              variant="outline"
+              key={suggestion.label}
+              disabled={timerState === 'running'}
+              onClick={() => {
+                setMinutes(suggestion.time.minutes);
+                setSeconds(suggestion.time.seconds);
+              }}
+            >
+              {suggestion.label}
+            </Button>
+          ))}
+        </CardFooter>
+      </Card>
+    </main>
   );
 }
