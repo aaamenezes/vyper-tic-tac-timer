@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Play, Pause, RotateCcw, StepForward } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -58,11 +59,22 @@ export default function Home() {
                 )
               }
             >
-              {timerState === 'notStarted'
-                ? 'Start'
-                : timerState === 'running'
-                ? 'Pause'
-                : 'Continue'}
+              {timerState === 'notStarted' ? (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  <span>Start</span>
+                </>
+              ) : timerState === 'running' ? (
+                <>
+                  <Pause className="mr-2 h-4 w-4" />
+                  <span>Pause</span>
+                </>
+              ) : (
+                <>
+                  <StepForward className="mr-2 h-4 w-4" />
+                  <span>Continue</span>
+                </>
+              )}
             </Button>
             <Button
               disabled={timerState === 'notStarted'}
@@ -72,7 +84,8 @@ export default function Home() {
                 if (timeout.current) clearInterval(timeout.current);
               }}
             >
-              Reset
+              <RotateCcw className="mr-2 h-4 w-4" />
+              <span>Reset</span>
             </Button>
           </div>
         </CardContent>
