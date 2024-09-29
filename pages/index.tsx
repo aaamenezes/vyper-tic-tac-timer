@@ -14,6 +14,7 @@ import StartButton from '@/src/components/StartButton';
 import ResetButton from '@/src/components/ResetButton';
 import { TimerStateProps, TimerTimeoutProps } from '@/src/types';
 import SuggestionButton from '@/src/components/SuggestionButton';
+import JSConfetti from 'js-confetti';
 
 export default function Home() {
   const [timerState, setTimerState] = useState<TimerStateProps>('notStarted');
@@ -35,6 +36,13 @@ export default function Home() {
       } else {
         setTimerState('notStarted');
         playFinish();
+
+        const jsConfetti = new JSConfetti();
+        jsConfetti.addConfetti({
+          emojis: ['💿', '💻', '⌨️', '🎮', '🛜', '💾', '🖥️', '🐥', '👩‍💻', '👨‍💻'],
+          emojiSize: 80,
+          confettiNumber: 200,
+        });
       }
     }
 
