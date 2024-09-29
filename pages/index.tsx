@@ -10,15 +10,36 @@ import {
 } from '@/components/ui/card';
 import { suggestions } from '@/src/data/suggestions';
 import { formatMinutes, formatSeconds } from '@/src/utils/formatTime';
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
+function useWithSound(audioPath: string) {
+  const soundRef: MutableRefObject<HTMLAudioElement | null> = useRef(null);
+
+  const play = useCallback(() => soundRef.current?.play(), []);
+
+  useEffect(() => {
+    soundRef.current = new Audio(audioPath);
+  }, [audioPath]);
+
+  return { play };
+}
 
 export default function Home() {
   const [timerState, setTimerState] = useState<
     'notStarted' | 'running' | 'paused'
   >('notStarted');
-  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(300);
 
   const timeout: MutableRefObject<NodeJS.Timeout | null> = useRef(null);
+
+  const { play: playTic } = useWithSound('/tic.wav');
+  const { play: playFinish } = useWithSound('/finish.wav');
 
   const startButtonMap: Record<
     typeof timerState,
@@ -43,17 +64,19 @@ export default function Home() {
       if (timeRemaining > 0) {
         if (timeout.current) clearInterval(timeout.current);
         timeout.current = setTimeout(() => {
+          if (timeRemaining > 1) playTic();
           setTimeRemaining((timeRemaining) => timeRemaining - 1);
         }, 1000);
       } else {
         setTimerState('notStarted');
+        playFinish();
       }
     }
 
     return () => {
       if (timeout.current) clearTimeout(timeout.current);
     };
-  }, [timeRemaining, timerState]);
+  }, [timeRemaining, timerState, playFinish, playTic]);
 
   return (
     <main className="grid place-items-center min-h-screen">
@@ -64,6 +87,7 @@ export default function Home() {
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-3">
           <h2 className="text-4xl text-center font-mono">
+            <audio src="/tic1.wav" />
             {formatMinutes(timeRemaining)}:{formatSeconds(timeRemaining)}
           </h2>
           <div className="flex gap-2">

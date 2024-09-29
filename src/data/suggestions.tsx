@@ -7,5 +7,5 @@ export const suggestions = [
   { label: '20min', time: 1200 },
   { label: '25min', time: 1500 },
   { label: '30min', time: 1800 },
-  { label: '45min', time: 2100 },
+  { label: '45min', time: 2700 },
 ];
