@@ -20,6 +20,24 @@ export default function Home() {
 
   const timeout: MutableRefObject<NodeJS.Timeout | null> = useRef(null);
 
+  const startButtonMap: Record<
+    typeof timerState,
+    { icon: JSX.Element; label: JSX.Element }
+  > = {
+    notStarted: {
+      icon: <Play className="mr-2 h-4 w-4" />,
+      label: <span>Start</span>,
+    },
+    running: {
+      icon: <Pause className="mr-2 h-4 w-4" />,
+      label: <span>Pause</span>,
+    },
+    paused: {
+      icon: <StepForward className="mr-2 h-4 w-4" />,
+      label: <span>Continue</span>,
+    },
+  };
+
   useEffect(() => {
     if (timerState === 'running') {
       if (timeRemaining > 0) {
@@ -59,22 +77,8 @@ export default function Home() {
                 )
               }
             >
-              {timerState === 'notStarted' ? (
-                <>
-                  <Play className="mr-2 h-4 w-4" />
-                  <span>Start</span>
-                </>
-              ) : timerState === 'running' ? (
-                <>
-                  <Pause className="mr-2 h-4 w-4" />
-                  <span>Pause</span>
-                </>
-              ) : (
-                <>
-                  <StepForward className="mr-2 h-4 w-4" />
-                  <span>Continue</span>
-                </>
-              )}
+              {startButtonMap[timerState].icon}
+              {startButtonMap[timerState].label}
             </Button>
             <Button
               disabled={timerState === 'notStarted'}
