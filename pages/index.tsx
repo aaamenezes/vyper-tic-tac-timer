@@ -17,7 +17,7 @@ import SuggestionButton from '@/src/components/SuggestionButton';
 
 export default function Home() {
   const [timerState, setTimerState] = useState<TimerStateProps>('notStarted');
-  const [timeRemaining, setTimeRemaining] = useState(302);
+  const [timeRemaining, setTimeRemaining] = useState(300);
 
   const timerTimeout: TimerTimeoutProps = useRef(null);
 
@@ -45,41 +45,43 @@ export default function Home() {
 
   return (
     <main className="grid place-items-center min-h-screen">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Viper Tic Tac Timer</CardTitle>
-          <CardDescription>Seu timer bonitinho!</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center gap-3">
-          <h2 className="text-4xl text-center font-mono">
-            {formatMinutes(timeRemaining)}:{formatSeconds(timeRemaining)}
-          </h2>
-          <div className="flex gap-2">
-            <StartButton
-              timerState={timerState}
-              setTimerState={setTimerState}
-              timeRemaining={timeRemaining}
-            />
-            <ResetButton
-              timerState={timerState}
-              setTimerState={setTimerState}
-              setTimeRemaining={setTimeRemaining}
-              timerTimeout={timerTimeout}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-wrap gap-2">
-          {suggestions.map((suggestion) => (
-            <SuggestionButton
-              suggestion={suggestion}
-              key={suggestion.label}
-              timerState={timerState}
-              setTimeRemaining={setTimeRemaining}
-              setTimerState={setTimerState}
-            />
-          ))}
-        </CardFooter>
-      </Card>
+      <div className="m-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Viper Tic Tac Timer</CardTitle>
+            <CardDescription>Seu timer bonitinho!</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-3">
+            <h2 className="text-4xl text-center font-mono">
+              {formatMinutes(timeRemaining)}:{formatSeconds(timeRemaining)}
+            </h2>
+            <div className="flex gap-2">
+              <StartButton
+                timerState={timerState}
+                setTimerState={setTimerState}
+                timeRemaining={timeRemaining}
+              />
+              <ResetButton
+                timerState={timerState}
+                setTimerState={setTimerState}
+                setTimeRemaining={setTimeRemaining}
+                timerTimeout={timerTimeout}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-wrap gap-2">
+            {suggestions.map((suggestion) => (
+              <SuggestionButton
+                suggestion={suggestion}
+                key={suggestion.label}
+                timerState={timerState}
+                setTimeRemaining={setTimeRemaining}
+                setTimerState={setTimerState}
+              />
+            ))}
+          </CardFooter>
+        </Card>
+      </div>
     </main>
   );
 }
