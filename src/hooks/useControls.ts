@@ -16,7 +16,7 @@ export default function useControls() {
   const [StartButtonIcon, setStartButtonIcon] = useState<ButtonIconProps>(Play)
 
   const { play: playTic } = useSounds('/tic.wav');
-  const { play: playFinish } = useSounds('/finish.wav');
+  const { play: playFinish } = useSounds('/finish.mp3');
 
   const timerTimeout: TimerTimeoutProps = useRef(null);
 
@@ -63,7 +63,7 @@ export default function useControls() {
 
         const jsConfetti = new JSConfetti();
         jsConfetti.addConfetti({
-          emojis: ['💿', '💻', '⌨️', '🎮', '🛜', '💾', '🖥️', '🐥', '👩‍💻', '👨‍💻'],
+          emojis: ['💿', '💻', '⌨️', '🎮', '🛜', '💾', '🖥️', '🐥', '👩‍💻', '👨‍💻', '🦧', '🙈'],
           emojiSize: 80,
           confettiNumber: 200,
         });

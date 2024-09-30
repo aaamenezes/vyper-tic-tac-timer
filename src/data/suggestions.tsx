@@ -1,4 +1,5 @@
 export const suggestions = [
+  { label: '1sec', time: 1 },
   { label: '5sec', time: 5 },
   { label: '1min', time: 60 },
   { label: '5min', time: 300 },
