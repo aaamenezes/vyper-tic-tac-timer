@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,49 +8,19 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { suggestions } from '@/src/data/suggestions';
+import useControls from '@/src/hooks/useControls';
 import { formatMinutes, formatSeconds } from '@/src/utils/formatTime';
-import { useEffect, useRef, useState } from 'react';
-import useSounds from '@/src/hooks/useSounds';
-import StartButton from '@/src/components/StartButton';
-import ResetButton from '@/src/components/ResetButton';
-import { TimerStateProps, TimerTimeoutProps } from '@/src/types';
-import SuggestionButton from '@/src/components/SuggestionButton';
-import JSConfetti from 'js-confetti';
+import { RotateCcw } from 'lucide-react';
 
 export default function Home() {
-  const [timerState, setTimerState] = useState<TimerStateProps>('notStarted');
-  const [timeRemaining, setTimeRemaining] = useState(300);
-
-  const timerTimeout: TimerTimeoutProps = useRef(null);
-
-  const { play: playTic } = useSounds('/tic.wav');
-  const { play: playFinish } = useSounds('/finish.wav');
-
-  useEffect(() => {
-    if (timerState === 'running') {
-      if (timeRemaining > 0) {
-        if (timerTimeout.current) clearTimeout(timerTimeout.current);
-        timerTimeout.current = setTimeout(() => {
-          if (timeRemaining > 1) playTic();
-          setTimeRemaining((timeRemaining) => timeRemaining - 1);
-        }, 1000);
-      } else {
-        setTimerState('notStarted');
-        playFinish();
-
-        const jsConfetti = new JSConfetti();
-        jsConfetti.addConfetti({
-          emojis: ['💿', '💻', '⌨️', '🎮', '🛜', '💾', '🖥️', '🐥', '👩‍💻', '👨‍💻'],
-          emojiSize: 80,
-          confettiNumber: 200,
-        });
-      }
-    }
-
-    return () => {
-      if (timerTimeout.current) clearTimeout(timerTimeout.current);
-    };
-  }, [timeRemaining, timerState, playFinish, playTic]);
+  const {
+    timeRemaining,
+    timerState,
+    startButtonLabel,
+    StartButtonIcon,
+    handleStartButton,
+    setNewTime,
+  } = useControls();
 
   return (
     <main className="grid place-items-center min-h-screen">
@@ -64,28 +35,32 @@ export default function Home() {
               {formatMinutes(timeRemaining)}:{formatSeconds(timeRemaining)}
             </h2>
             <div className="flex gap-2">
-              <StartButton
-                timerState={timerState}
-                setTimerState={setTimerState}
-                timeRemaining={timeRemaining}
-              />
-              <ResetButton
-                timerState={timerState}
-                setTimerState={setTimerState}
-                setTimeRemaining={setTimeRemaining}
-                timerTimeout={timerTimeout}
-              />
+              <Button
+                disabled={timeRemaining === 0}
+                onClick={handleStartButton}
+              >
+                <StartButtonIcon className="w-4 h-4 mr-2" />
+                <span>{startButtonLabel}</span>
+              </Button>
+              <Button
+                disabled={timerState === 'notStarted'}
+                onClick={() => setNewTime(0)}
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                <span>Reset</span>
+              </Button>
             </div>
           </CardContent>
           <CardFooter className="flex flex-wrap gap-2">
             {suggestions.map((suggestion) => (
-              <SuggestionButton
-                suggestion={suggestion}
+              <Button
+                variant="outline"
                 key={suggestion.label}
-                timerState={timerState}
-                setTimeRemaining={setTimeRemaining}
-                setTimerState={setTimerState}
-              />
+                disabled={timerState === 'running'}
+                onClick={() => setNewTime(suggestion.time)}
+              >
+                {suggestion.label}
+              </Button>
             ))}
           </CardFooter>
         </Card>
