@@ -1,10 +1,12 @@
-import { ForwardRefExoticComponent, RefAttributes, useCallback, useEffect, useRef, useState } from "react"
-import { TimerStateProps, TimerTimeoutProps } from "../types";
+import { useCallback, useEffect, useRef, useState } from "react"
+import type { ForwardRefExoticComponent, MutableRefObject, RefAttributes } from "react"
 import useSounds from "./useSounds";
 import JSConfetti from "js-confetti";
 import { Play, Pause, StepForward } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 
+type TimerStateProps = 'notStarted' | 'running' | 'paused'
+type TimerTimeoutProps = MutableRefObject<NodeJS.Timeout | null>
 type ButtonIconProps = ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>
 
 export default function useControls() {
