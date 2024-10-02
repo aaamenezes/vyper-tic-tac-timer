@@ -7,10 +7,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { suggestions } from '@/src/data/suggestions';
 import useControls from '@/src/hooks/useControls';
 import { formatMinutes, formatSeconds } from '@/src/utils/formatTime';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Settings } from 'lucide-react';
 
 export default function Home() {
   const {
@@ -20,15 +30,57 @@ export default function Home() {
     StartButtonIcon,
     handleStartButton,
     setNewTime,
+    hasFinishSound,
+    hasTicSound,
+    setHasFinishSound,
+    setHasTicSound,
   } = useControls();
 
   return (
     <main className="grid place-items-center min-h-screen">
       <div className="m-4">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Viper Tic Tac Timer</CardTitle>
-            <CardDescription>Seu timer bonitinho!</CardDescription>
+          <CardHeader className="flex flex-row justify-between">
+            <div>
+              <CardTitle>Vyper Tic Tac Timer</CardTitle>
+              <CardDescription>Seu timer bonitinho!</CardDescription>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" aria-label="abrir configurações">
+                  <Settings />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Configuration</DialogTitle>
+                  <DialogDescription className="mt-4">
+                    Turn yout Vyper Tictac Timer better
+                  </DialogDescription>
+
+                  <div className="flex items-center gap-2 mb-3 cursor-pointer">
+                    <Checkbox
+                      id="tictac-sound"
+                      checked={hasTicSound}
+                      onClick={() => setHasTicSound((current) => !current)}
+                    />
+                    <Label htmlFor="tictac-sound" className=" cursor-pointer">
+                      Active tictac sound
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      id="finish-sound"
+                      checked={hasFinishSound}
+                      onClick={() => setHasFinishSound((current) => !current)}
+                    />
+                    <Label htmlFor="finish-sound" className=" cursor-pointer">
+                      Active finish sound
+                    </Label>
+                  </div>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-3">
             <h2 className="text-4xl text-center font-mono">
