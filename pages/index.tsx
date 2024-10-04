@@ -33,8 +33,8 @@ export default function Home() {
     hasTicSound,
     handleStartButton,
     setNewTime,
-    setHasFinishSound,
-    setHasTicSound,
+    handleFinishSound,
+    handleTicSound,
   } = useControls();
 
   return (
@@ -63,7 +63,7 @@ export default function Home() {
                     <Checkbox
                       id="tictac-sound"
                       checked={hasTicSound}
-                      onClick={() => setHasTicSound((current) => !current)}
+                      onClick={() => handleTicSound(!hasTicSound)}
                     />
                     <Label htmlFor="tictac-sound" className=" cursor-pointer">
                       Active tictac sound
@@ -73,7 +73,7 @@ export default function Home() {
                     <Checkbox
                       id="finish-sound"
                       checked={hasFinishSound}
-                      onClick={() => setHasFinishSound((current) => !current)}
+                      onClick={() => handleFinishSound(!hasFinishSound)}
                     />
                     <Label htmlFor="finish-sound" className=" cursor-pointer">
                       Active finish sound

@@ -60,6 +60,40 @@ export default function useControls() {
     [stopTimeout]
   );
 
+  const handleTicSound = useCallback((state: boolean) => {
+    setHasTicSound(state);
+    if (window) {
+      window.localStorage.setItem('vyper.hasTicSound', state.toString());
+    }
+  }, []);
+
+  const handleFinishSound = useCallback((state: boolean) => {
+    setHasFinishSound(state);
+    if (window) {
+      window.localStorage.setItem('vyper.hasFinishSound', state.toString());
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!window) return;
+
+    const initialHasTicSound = window.localStorage.getItem('vyper.hasTicSound');
+    if (initialHasTicSound) {
+      setHasTicSound(initialHasTicSound === 'true');
+    } else {
+      window.localStorage.setItem('vyper.hasTicSound', 'true');
+    }
+
+    const initialHasFinishSound = window.localStorage.getItem(
+      'vyper.hasFinishSound'
+    );
+    if (initialHasFinishSound) {
+      setHasFinishSound(initialHasFinishSound === 'true');
+    } else {
+      window.localStorage.setItem('vyper.hasFinishSound', 'true');
+    }
+  }, []);
+
   useEffect(() => {
     stopTimeout();
 
@@ -122,7 +156,7 @@ export default function useControls() {
     hasFinishSound,
     handleStartButton,
     setNewTime,
-    setHasTicSound,
-    setHasFinishSound,
+    handleTicSound,
+    handleFinishSound,
   };
 }
