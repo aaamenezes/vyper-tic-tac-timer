@@ -17,6 +17,7 @@ type ButtonIconProps = ForwardRefExoticComponent<
 
 export default function useControls() {
   const [timeRemaining, setTimeRemaining] = useState(300);
+  const [lastSetTimer, setLastSetTimer] = useState(300);
   const [timerState, setTimerState] = useState<TimerStateProps>('notStarted');
   const [startButtonLabel, setStartButtonLabel] = useState('Start');
   const [StartButtonIcon, setStartButtonIcon] = useState<ButtonIconProps>(Play);
@@ -51,6 +52,7 @@ export default function useControls() {
     (time: number) => {
       stopTimeout();
       setTimeRemaining(time);
+      setLastSetTimer(time);
       setTimerState('notStarted');
       setStartButtonLabel('Start');
       setStartButtonIcon(Play);
@@ -59,14 +61,16 @@ export default function useControls() {
   );
 
   useEffect(() => {
+    stopTimeout();
+
     if (timerState === 'running') {
       if (timeRemaining > 0) {
-        stopTimeout();
         timerTimeout.current = setTimeout(() => {
           if (timeRemaining > 1 && hasTicSound) playTic();
           setTimeRemaining((timeRemaining) => timeRemaining - 1);
         }, 1000);
       } else {
+        setTimeRemaining(lastSetTimer);
         setTimerState('notStarted');
         setStartButtonLabel('Start');
         setStartButtonIcon(Play);
@@ -88,7 +92,7 @@ export default function useControls() {
             '🦧',
             '🙈',
           ],
-          emojiSize: 70,
+          emojiSize: 50,
           confettiNumber: 100,
         });
       }
@@ -102,6 +106,7 @@ export default function useControls() {
     timerState,
     hasTicSound,
     hasFinishSound,
+    lastSetTimer,
     stopTimeout,
     playFinish,
     playTic,
@@ -109,6 +114,7 @@ export default function useControls() {
 
   return {
     timeRemaining,
+    lastSetTimer,
     timerState,
     startButtonLabel,
     StartButtonIcon,

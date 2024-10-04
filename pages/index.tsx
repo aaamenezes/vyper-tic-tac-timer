@@ -20,18 +20,19 @@ import { Label } from '@/components/ui/label';
 import { suggestions } from '@/src/data/suggestions';
 import useControls from '@/src/hooks/useControls';
 import { formatMinutes, formatSeconds } from '@/src/utils/formatTime';
-import { RotateCcw, Settings } from 'lucide-react';
+import { CircleCheckBig, RotateCcw, Settings } from 'lucide-react';
 
 export default function Home() {
   const {
     timeRemaining,
+    lastSetTimer,
     timerState,
     startButtonLabel,
     StartButtonIcon,
-    handleStartButton,
-    setNewTime,
     hasFinishSound,
     hasTicSound,
+    handleStartButton,
+    setNewTime,
     setHasFinishSound,
     setHasTicSound,
   } = useControls();
@@ -43,7 +44,7 @@ export default function Home() {
           <CardHeader className="flex flex-row justify-between">
             <div>
               <CardTitle>Vyper Tic Tac Timer</CardTitle>
-              <CardDescription>Seu timer bonitinho!</CardDescription>
+              <CardDescription>Your beautiful timer</CardDescription>
             </div>
             <Dialog>
               <DialogTrigger asChild>
@@ -96,22 +97,28 @@ export default function Home() {
               </Button>
               <Button
                 disabled={timerState === 'notStarted'}
-                onClick={() => setNewTime(0)}
+                onClick={() => setNewTime(lastSetTimer)}
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
-                <span>Reset</span>
+                <span>Restart</span>
               </Button>
             </div>
           </CardContent>
           <CardFooter className="flex flex-wrap gap-2">
             {suggestions.map((suggestion) => (
               <Button
-                variant="outline"
+                variant={
+                  suggestion.time === lastSetTimer ? 'secondary' : 'outline'
+                }
+                aria-selected={suggestion.time === lastSetTimer}
                 key={suggestion.label}
                 disabled={timerState === 'running'}
                 onClick={() => setNewTime(suggestion.time)}
               >
                 {suggestion.label}
+                {suggestion.time === lastSetTimer && (
+                  <CircleCheckBig className="w-4 h-4 ml-2" />
+                )}
               </Button>
             ))}
           </CardFooter>
