@@ -27,32 +27,34 @@ export default function Home() {
   return (
     <main className="grid place-items-center min-h-screen">
       <div className="m-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="flex flex-row justify-between">
+        <Card className="w-[90vw] max-w-[420px] max-h-[90vh]">
+          <CardHeader className="flex flex-row justify-between gap-4">
             <div>
-              <CardTitle>Vyper Tic Tac Timer</CardTitle>
+              <CardTitle className="mb-2">Vyper Tic Tac Timer</CardTitle>
               <CardDescription>Your beautiful timer</CardDescription>
             </div>
             <Config />
           </CardHeader>
-          <CardContent className="flex flex-col items-center gap-3">
-            <h2 className="text-4xl text-center font-mono">
+          <CardContent className="flex flex-col gap-4">
+            <h2 className="text-5xl text-center font-mono">
               {formatMinutes(timeRemaining)}:{formatSeconds(timeRemaining)}
             </h2>
-            <div className="flex gap-2">
+            <div className="flex justify-center gap-2">
               <Button
                 disabled={timeRemaining === 0}
                 onClick={handleStartButton}
+                className="h-fit py-2 px-4"
               >
                 <StartButtonIcon className="w-4 h-4 mr-2" />
-                <span>{startButtonLabel}</span>
+                <span className="text-lg">{startButtonLabel}</span>
               </Button>
               <Button
                 disabled={timerState === 'notStarted'}
                 onClick={() => setNewTime(lastSetTimer)}
+                className="h-fit py-2 px-4"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
-                <span>Restart</span>
+                <span className="text-lg">Restart</span>
               </Button>
             </div>
           </CardContent>

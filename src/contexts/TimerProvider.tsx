@@ -5,6 +5,7 @@ import {
   PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -14,12 +15,29 @@ import {
   PresetProps,
   StartButtonLabelProps,
   TimerStateProps,
-} from '../type';
+} from '../types';
 import TimerContext from './timerContext';
 
 type TimerTimeoutProps = MutableRefObject<NodeJS.Timeout | null>;
 
 export default function TimerProvider({ children }: PropsWithChildren) {
+  const defautPresets = useMemo(
+    () => [
+      { label: '1sec', time: 1 },
+      { label: '5sec', time: 5 },
+      { label: '1min', time: 60 },
+      { label: '5min', time: 300 },
+      { label: '10min', time: 600 },
+      { label: '15min', time: 900 },
+      { label: '20min', time: 1200 },
+      { label: '25min', time: 1500 },
+      { label: '30min', time: 1800 },
+      { label: '45min', time: 2700 },
+      { label: '60min', time: 3600 },
+    ],
+    []
+  );
+
   const [timeRemaining, setTimeRemaining] = useState(300);
   const [lastSetTimer, setLastSetTimer] = useState(300);
   const [timerState, setTimerState] = useState<TimerStateProps>('notStarted');
@@ -66,85 +84,119 @@ export default function TimerProvider({ children }: PropsWithChildren) {
     [stopTimeout]
   );
 
-  const handleTicSound = useCallback((state: boolean) => {
-    setHasTicSound(state);
-    if (window) {
-      window.localStorage.setItem('vyper.hasTicSound', state.toString());
-    }
-  }, []);
+  const handleLocalStorage = useCallback(
+    (method: 'getItem' | 'setItem', key: string, value = '') => {
+      if (!window) return;
+      return window.localStorage[method](key, value);
+    },
+    []
+  );
+  const handleTicSound = useCallback(
+    (state: boolean) => {
+      setHasTicSound(state);
+      handleLocalStorage('setItem', 'vyper.hasTicSound', state.toString());
+    },
+    [handleLocalStorage]
+  );
 
-  const handleFinishSound = useCallback((state: boolean) => {
-    setHasFinishSound(state);
-    if (window) {
-      window.localStorage.setItem('vyper.hasFinishSound', state.toString());
-    }
-  }, []);
+  const handleFinishSound = useCallback(
+    (state: boolean) => {
+      setHasFinishSound(state);
+      handleLocalStorage('setItem', 'vyper.hasFinishSound', state.toString());
+    },
+    [handleLocalStorage]
+  );
 
   const removePreset = useCallback(
     (time: number) => {
       const newPresets = presets.filter((preset) => preset.time !== time);
 
       setPresets(newPresets);
-
-      if (window) {
-        window.localStorage.setItem(
-          'vyper.presets',
-          JSON.stringify(newPresets)
-        );
-      }
+      handleLocalStorage(
+        'setItem',
+        'vyper.presets',
+        JSON.stringify(newPresets)
+      );
     },
+    [presets, handleLocalStorage]
+  );
+
+  const addPreset = useCallback(
+    (preset: PresetProps) => {
+      const newPresets = [...presets, preset].sort((a, b) => a.time - b.time);
+      setPresets(newPresets);
+      handleLocalStorage(
+        'setItem',
+        'vyper.presets',
+        JSON.stringify(newPresets)
+      );
+    },
+    [presets, handleLocalStorage]
+  );
+
+  const resetPresets = useCallback(() => {
+    setPresets(defautPresets);
+
+    handleLocalStorage(
+      'setItem',
+      'vyper.presets',
+      JSON.stringify(defautPresets)
+    );
+  }, [defautPresets, handleLocalStorage]);
+
+  const presetAlreadyExists = useCallback(
+    (preset: PresetProps) =>
+      presets.some(
+        (currentPreset) =>
+          currentPreset.label === preset.label &&
+          currentPreset.time === preset.time
+      ),
     [presets]
   );
 
   useEffect(() => {
     if (!window) return;
 
-    const initialHasTicSoundFromLocalStorage =
-      window.localStorage.getItem('vyper.hasTicSound');
+    const initialHasTicSoundFromLocalStorage = handleLocalStorage(
+      'getItem',
+      'vyper.hasTicSound'
+    );
+
     if (initialHasTicSoundFromLocalStorage) {
       setHasTicSound(initialHasTicSoundFromLocalStorage === 'true');
     } else {
-      window.localStorage.setItem('vyper.hasTicSound', 'true');
+      handleLocalStorage('setItem', 'vyper.hasTicSound', 'true');
     }
 
-    const initialHasFinishSoundFromLocalStorage = window.localStorage.getItem(
+    const initialHasFinishSoundFromLocalStorage = handleLocalStorage(
+      'getItem',
       'vyper.hasFinishSound'
     );
+
     if (initialHasFinishSoundFromLocalStorage) {
       setHasFinishSound(initialHasFinishSoundFromLocalStorage === 'true');
     } else {
-      window.localStorage.setItem('vyper.hasFinishSound', 'true');
+      handleLocalStorage('setItem', 'vyper.hasFinishSound', 'true');
     }
 
-    const initialPresetsFromLocalStorage =
-      window.localStorage.getItem('vyper.presets');
+    const initialPresetsFromLocalStorage = handleLocalStorage(
+      'getItem',
+      'vyper.presets'
+    );
+
     if (
       initialPresetsFromLocalStorage &&
       initialPresetsFromLocalStorage !== '[]'
     ) {
       setPresets(JSON.parse(initialPresetsFromLocalStorage));
     } else {
-      const initialPresets = [
-        { label: '1sec', time: 1 },
-        { label: '5sec', time: 5 },
-        { label: '1min', time: 60 },
-        { label: '5min', time: 300 },
-        { label: '10min', time: 600 },
-        { label: '15min', time: 900 },
-        { label: '20min', time: 1200 },
-        { label: '25min', time: 1500 },
-        { label: '30min', time: 1800 },
-        { label: '45min', time: 2700 },
-        { label: '60min', time: 3600 },
-      ];
-
-      setPresets(initialPresets);
+      setPresets(defautPresets);
       window.localStorage.setItem(
         'vyper.presets',
-        JSON.stringify(initialPresets)
+        JSON.stringify(defautPresets)
       );
     }
-  }, []);
+  }, [defautPresets, handleLocalStorage]);
 
   useEffect(() => {
     if (timerState === 'running') {
@@ -213,6 +265,9 @@ export default function TimerProvider({ children }: PropsWithChildren) {
         handleTicSound,
         handleFinishSound,
         removePreset,
+        addPreset,
+        resetPresets,
+        presetAlreadyExists,
       }}
     >
       {children}

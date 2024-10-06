@@ -11,6 +11,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Settings, X } from 'lucide-react';
 import { useTimerContext } from '../hooks/useTimerContext';
+import AddTimerForm from './AddTimerForm';
 
 export default function Config() {
   const {
@@ -22,6 +23,7 @@ export default function Config() {
     handleFinishSound,
     handleTicSound,
     removePreset,
+    resetPresets,
   } = useTimerContext();
 
   return (
@@ -31,7 +33,7 @@ export default function Config() {
           <Settings />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] gap-8">
+      <DialogContent className="w-[90vw] max-w-[640px] max-h-[90vh] gap-8 overflow-auto">
         <DialogHeader>
           <DialogTitle>Configuration</DialogTitle>
           <DialogDescription className="mt-4">
@@ -61,12 +63,22 @@ export default function Config() {
           </div>
         </div>
         <div>
-          <h3 className="scroll-m-20 text-md font-semibold tracking-tight mb-2">
-            Timers
-          </h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="scroll-m-20 text-md font-semibold tracking-tight">
+              Timers
+            </h3>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-xs"
+              onClick={resetPresets}
+            >
+              reset timers
+            </Button>
+          </div>
+
           <ul className="flex flex-wrap gap-2">
             {presets.map((preset) => (
-              <li key={preset.label}>
+              <li key={preset.label + ' ' + preset.time}>
                 <Button
                   variant="outline"
                   aria-selected={preset.time === lastSetTimer}
@@ -81,6 +93,7 @@ export default function Config() {
             ))}
           </ul>
         </div>
+        <AddTimerForm />
       </DialogContent>
     </Dialog>
   );

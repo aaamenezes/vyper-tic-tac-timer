@@ -4,7 +4,7 @@ import {
   PresetProps,
   StartButtonLabelProps,
   TimerStateProps,
-} from '../type';
+} from '../types';
 
 interface TimerContextProps {
   timeRemaining: number;
@@ -20,6 +20,9 @@ interface TimerContextProps {
   handleFinishSound: (state: boolean) => void;
   handleTicSound: (state: boolean) => void;
   removePreset: (time: number) => void;
+  addPreset: (preset: PresetProps) => void;
+  resetPresets: () => void;
+  presetAlreadyExists: (preset: PresetProps) => boolean;
 }
 
 const TimerContext = createContext({} as TimerContextProps);
