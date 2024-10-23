@@ -53,6 +53,8 @@ export default function TimerProvider({ children }: PropsWithChildren) {
 
   const timerTimeout: TimerTimeoutProps = useRef(null);
 
+  const jsConfetti = useMemo(() => new JSConfetti(), []);
+
   const stopTimeout = useCallback(() => {
     if (timerTimeout.current) clearTimeout(timerTimeout.current);
   }, []);
@@ -213,7 +215,6 @@ export default function TimerProvider({ children }: PropsWithChildren) {
         setStartButtonIcon(Play);
         if (hasFinishSound) playFinish();
 
-        const jsConfetti = new JSConfetti();
         jsConfetti.addConfetti({
           emojis: [
             '💿',
@@ -239,6 +240,7 @@ export default function TimerProvider({ children }: PropsWithChildren) {
       stopTimeout();
     };
   }, [
+    jsConfetti,
     timeRemaining,
     timerState,
     hasTicSound,
