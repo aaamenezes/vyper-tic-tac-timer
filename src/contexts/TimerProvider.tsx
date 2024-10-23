@@ -47,13 +47,12 @@ export default function TimerProvider({ children }: PropsWithChildren) {
   const [hasTicSound, setHasTicSound] = useState(true);
   const [hasFinishSound, setHasFinishSound] = useState(true);
   const [presets, setPresets] = useState<PresetProps[]>([]);
+  const [jsConfetti, setJsConfetti] = useState<JSConfetti | null>(null);
 
   const { play: playTic } = useSounds('/tic.wav');
   const { play: playFinish } = useSounds('/finish.mp3');
 
   const timerTimeout: TimerTimeoutProps = useRef(null);
-
-  const jsConfetti = useMemo(() => new JSConfetti(), []);
 
   const stopTimeout = useCallback(() => {
     if (timerTimeout.current) clearTimeout(timerTimeout.current);
@@ -159,6 +158,8 @@ export default function TimerProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!window) return;
 
+    setJsConfetti(new JSConfetti());
+
     const initialHasTicSoundFromLocalStorage = handleLocalStorage(
       'getItem',
       'vyper.hasTicSound'
@@ -215,7 +216,7 @@ export default function TimerProvider({ children }: PropsWithChildren) {
         setStartButtonIcon(Play);
         if (hasFinishSound) playFinish();
 
-        jsConfetti.addConfetti({
+        jsConfetti?.addConfetti({
           emojis: [
             '💿',
             '💻',
