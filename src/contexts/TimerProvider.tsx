@@ -18,8 +18,6 @@ import {
 } from '../types';
 import TimerContext from './timerContext';
 
-type TimerTimeoutProps = MutableRefObject<NodeJS.Timeout | null>;
-
 export default function TimerProvider({ children }: PropsWithChildren) {
   const defautPresets = useMemo(
     () => [
@@ -52,26 +50,71 @@ export default function TimerProvider({ children }: PropsWithChildren) {
   const { play: playTic } = useSounds('/tic.wav');
   const { play: playFinish } = useSounds('/finish.mp3');
 
-  const timerTimeout: TimerTimeoutProps = useRef(null);
+  const timerTimeoutRef: MutableRefObject<NodeJS.Timeout | null> = useRef(null);
+  const wakeLockRef: MutableRefObject<WakeLockSentinel | null> = useRef(null);
 
   const stopTimeout = useCallback(() => {
-    if (timerTimeout.current) clearTimeout(timerTimeout.current);
+    if (timerTimeoutRef.current) clearTimeout(timerTimeoutRef.current);
   }, []);
 
-  const handleStartButton = useCallback(() => {
+  const lockScreen = useCallback(async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        const wakeLock = await navigator.wakeLock.request('screen');
+
+        // Listener para quando o wake lock for liberado
+        /*
+        wakeLock.addEventListener('release', () => {
+          console.log('Wake Lock foi liberado');
+        });
+        */
+
+        return wakeLock;
+      } else {
+        console.log('Wake Lock API não é suportada neste navegador');
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao solicitar wake lock:', error);
+      return null;
+    }
+  }, []);
+
+  const unlockScreen = useCallback(
+    async (wakeLock: WakeLockSentinel | null) => {
+      if (wakeLock) {
+        wakeLock
+          .release()
+          .then(() => {
+            /* Wake Lock liberado manualmente */
+          })
+          .catch((error: Error) => {
+            console.error('Erro ao liberar wake lock:', error);
+          });
+      }
+    },
+    []
+  );
+
+  const handleStartButton = useCallback(async () => {
     stopTimeout();
 
     if (timerState === 'paused' || timerState === 'notStarted') {
+      // Iniciar ou continuar o timer
       setTimerState('running');
       setStartButtonLabel('Pause');
       setStartButtonIcon(Pause);
+      wakeLockRef.current = await lockScreen();
       return;
     }
 
+    // Pausar o timer
     setTimerState('paused');
     setStartButtonLabel('Continue');
     setStartButtonIcon(StepForward);
-  }, [stopTimeout, timerState]);
+    unlockScreen(wakeLockRef.current);
+    wakeLockRef.current = null;
+  }, [stopTimeout, timerState, lockScreen, unlockScreen]);
 
   const setNewTime = useCallback(
     (time: number) => {
@@ -84,6 +127,12 @@ export default function TimerProvider({ children }: PropsWithChildren) {
     },
     [stopTimeout]
   );
+
+  const handleRestartButton = useCallback(() => {
+    setNewTime(lastSetTimer);
+    unlockScreen(wakeLockRef.current);
+    wakeLockRef.current = null;
+  }, [setNewTime, lastSetTimer, unlockScreen]);
 
   const handleLocalStorage = useCallback(
     (method: 'getItem' | 'setItem', key: string, value = '') => {
@@ -155,6 +204,15 @@ export default function TimerProvider({ children }: PropsWithChildren) {
     [presets]
   );
 
+  /*
+  function clockTimer(continueInterval = true) {
+    clock.addSecond();
+    if (continueInterval) {
+      setTimeout(clockTimer, 1000);
+    }
+  }
+  */
+
   useEffect(() => {
     if (!window) return;
 
@@ -205,7 +263,7 @@ export default function TimerProvider({ children }: PropsWithChildren) {
     if (timerState === 'running') {
       if (timeRemaining > 0) {
         stopTimeout();
-        timerTimeout.current = setTimeout(() => {
+        timerTimeoutRef.current = setTimeout(() => {
           if (timeRemaining > 1 && hasTicSound) playTic();
           setTimeRemaining((timeRemaining) => timeRemaining - 1);
         }, 1000);
@@ -234,6 +292,8 @@ export default function TimerProvider({ children }: PropsWithChildren) {
           emojiSize: 70,
           confettiNumber: 100,
         });
+
+        wakeLockRef.current = null;
       }
     }
 
@@ -252,6 +312,20 @@ export default function TimerProvider({ children }: PropsWithChildren) {
     playTic,
   ]);
 
+  useEffect(() => {
+    async function handleVisibilityChange() {
+      if (wakeLockRef !== null && document.visibilityState === 'visible') {
+        wakeLockRef.current = await lockScreen();
+      }
+    }
+    // Reativar o wake lock quando o usuário voltar para a aba
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [lockScreen]);
+
   return (
     <TimerContext.Provider
       value={{
@@ -264,6 +338,7 @@ export default function TimerProvider({ children }: PropsWithChildren) {
         hasFinishSound,
         presets,
         handleStartButton,
+        handleRestartButton,
         setNewTime,
         handleTicSound,
         handleFinishSound,

@@ -16,6 +16,7 @@ interface TimerContextProps {
   hasFinishSound: boolean;
   hasTicSound: boolean;
   handleStartButton: () => void;
+  handleRestartButton: () => void;
   setNewTime: (time: number) => void;
   handleFinishSound: (state: boolean) => void;
   handleTicSound: (state: boolean) => void;

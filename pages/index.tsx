@@ -21,6 +21,7 @@ export default function Home() {
     StartButtonIcon,
     presets,
     handleStartButton,
+    handleRestartButton,
     setNewTime,
   } = useTimerContext();
 
@@ -50,7 +51,7 @@ export default function Home() {
               </Button>
               <Button
                 disabled={timerState === 'notStarted'}
-                onClick={() => setNewTime(lastSetTimer)}
+                onClick={handleRestartButton}
                 className="h-fit py-2 px-4"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
